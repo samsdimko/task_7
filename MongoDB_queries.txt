@@ -1,0 +1,58 @@
+-- Топ-5 часто встречаемых комментариев
+
+[
+  {
+    $group: {
+      _id: "$content",
+      count: {
+        $sum: 1
+      },
+      content: {
+        $first: "$content"
+      }
+    }
+  },
+  {
+    $sort: {
+      count: -1
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      content: 1,
+      count: 1
+    }
+  },
+  {
+    $limit: 5
+  }
+]
+
+
+-- Все записи, где длина поля “content” составляет менее 5 символов
+
+{ $expr: { $lt: [ {$strLenCP: "$content" }, 5 ] } }
+
+
+-- Средний рейтинг по каждому дню (результат должен быть в виде timestamp type).
+
+[
+  {
+    $group: {
+      _id: {
+        $dateToString: {
+          format: "%Y-%m-%d",
+          date: {
+            $toDate: {
+              $substr: ["$at", 0, 10]
+            }
+          }
+        }
+      },
+      average_rating: {
+        $avg: "$score"
+      }
+    }
+  }
+]
